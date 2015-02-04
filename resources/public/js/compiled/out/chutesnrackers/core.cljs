@@ -9,18 +9,32 @@
 
 ;; Adults wanna learn, but they don't wanna be taught!
 
-(def square-px 100)
-(def gutter-width 100)
+(def square-px 80)
+(def gutter-width 60)
 
 (def rows 5)
 (def cols 8)
 (def grid-squares (* rows cols))
 
 (def colors ["red" "yellow" "green" "teal" "blue" "purple"])
+(def values ["Fanatical Support® in all we do."
+             "Results first, substance over flash."
+             "Committed to Greatness"
+             "Full Disclosure and Transparency"
+             "Passion for our Work"
+             "Treat fellow Rackers like Friends and Family"])
+(def values-by-color (zipmap colors values))
 
 (defn initial-state
   []
-  {:i (dec grid-squares)})
+  {:i (dec grid-squares)
+   :value nil
+   :squares (for [i (range grid-squares)]
+              (let [color (rand-nth colors)]
+                {:i i
+                 :color color
+                 :value (values-by-color color)}))
+   :messages '("You start your day at the Rack.")})
 
 (defonce app-state
   (atom (initial-state)))
@@ -44,11 +58,11 @@
     #js {:left x :top y}))
 
 (defn grid-square
-  [i color]
+  [i {color :color}]
   (dom/div #js {:className (s/join " " ["grid-square" color])
                 :style (position-style i)
                 :id (str "grid-square-" i)}
-           (str i " " (grid-loc i))))
+           nil))
 
 (defn peon
   [i]
@@ -56,20 +70,69 @@
                 :src "img/rackspace.png"
                 :style (position-style i)}))
 
+(def happy-customer
+  (dom/img #js {:className "happy-customer"
+                :src "img/happy-customer.png"
+                :style (position-style 0)}))
+
 (defn grid
   [app]
   (apply dom/div #js {:className "grid"}
-         (conj (map grid-square
-                    (range grid-squares)
-                    (cycle colors))
-               (peon (:i app)))))
+         (conj (map-indexed grid-square (:squares app))
+               (peon (:i app))
+               happy-customer)))
+
+(defn values-list
+  [app]
+  (apply dom/ul nil
+         (for [[color value] values-by-color]
+           (let [classes (if (= (:value app) value)
+                             [color "highlight"]
+                             [color])]
+             (dom/li
+              #js {:className (s/join " " classes)}
+              (dom/span nil value))))))
+
+(defn teleport
+  "Possibly get teleported by a chute or Racker."
+  [state]
+  state)
+
+(defn roll
+  [state]
+  (let [prev-i (:i state)
+        new-value (rand-nth values)
+        squares-to-go (reverse (take prev-i (:squares state)))
+        next-square (first (filter #(= (:value %) new-value) squares-to-go))
+        next-i (or (:i next-square) prev-i)]
+    (-> state
+        (assoc :value new-value)
+        (assoc :i next-i)
+        (update :messages conj (str "You go from " prev-i " to " next-i ".")))))
+
+(defn messages-list
+  [app]
+  (apply dom/ul
+         nil
+         (for [m (:messages app)]
+           (dom/li nil m))))
+
+(defn hud
+  [app]
+  (dom/div #js {:className "hud"}
+           (dom/span nil (str "Steps to go: " (:i app)))
+           (values-list app)
+           (dom/button #js {:onClick #(om/transact! app roll)}
+                       "Let's go!")
+           (messages-list app)))
 
 (om/root
   (fn [app owner]
     (reify om/IRender
       (render [_]
         (dom/div #js {:className "container"}
-                 (grid app)))))
+                 (grid app)
+                 (hud app)))))
   app-state
   {:target (. js/document (getElementById "app"))})
 
