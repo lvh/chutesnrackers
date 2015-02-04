@@ -57,7 +57,7 @@
     #js {:left x :top y}))
 
 (defn grid-square
-  [i {color :color}]
+  [{i :i color :color}]
   (dom/div #js {:className (s/join " " ["grid-square" color])
                 :style (position-style i)
                 :id (str "grid-square-" i)}
@@ -77,7 +77,7 @@
 (defn grid
   [app]
   (apply dom/div #js {:className "grid"}
-         (conj (map-indexed grid-square (:squares app))
+         (conj (map grid-square (:squares app))
                (peon (:i app))
                happy-customer)))
 
