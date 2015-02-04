@@ -111,10 +111,16 @@
          (for [m (:messages app)]
            (dom/li nil m))))
 
+(defn steps-to-go-msg
+  [i]
+  (if (= i 0)
+    (str "Whew! All done, time to go home ☺")
+    (str i " steps to go.")))
+
 (defn hud
   [app]
   (dom/div #js {:className "hud"}
-           (dom/span nil (str "Steps to go: " (:i app)))
+           (dom/span nil (steps-to-go-msg (:i app)))
            (values-list app)
            (dom/button #js {:disabled (= (:i app) 0)
                             :onClick #(om/transact! app roll)}
