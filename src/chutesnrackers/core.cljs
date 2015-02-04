@@ -116,9 +116,20 @@
 
 (defn teleport
   "Possibly get teleported by a chute or Racker."
-  [state]
-  (let [current-square (:squares state (:i state))]
-    (-> state)))
+  [{curr-i :i squares :squares :as state}]
+  (let [square-type (:square-type (nth squares curr-i))
+        _ (println square-type)]
+    (if square-type
+      (let [[i msg] (condp = square-type
+                      :chute [(+ (rand-int (- grid-squares curr-i))
+                                 curr-i)
+                              "You fall down."]
+                      :racker [(rand-int curr-i)
+                               "You get helped up."])]
+        (-> state
+            (assoc :i i)
+            (update :messages conj msg)))
+      state)))
 
 (defn roll
   [state]
