@@ -29,7 +29,8 @@
   "Square types, frequency weighted by probability."
   (conj (repeat 5 nil) :chute))
 
-(def initial-state
+(defn initial-state
+  []
   {:i (dec grid-squares)
    :value nil
    :squares (for [i (range grid-squares)]
@@ -42,7 +43,7 @@
    :messages '("You start your day at the Rack.")})
 
 (defonce app-state
-  (atom initial-state))
+  (atom (initial-state)))
 
 (defn grid-loc
   [i]
@@ -134,7 +135,7 @@
            (dom/button #js {:disabled (= (:i app) 0)
                             :onClick #(om/transact! app roll)}
                        "Let's go!")
-           (dom/button #js {:onClick #(om/update! app initial-state)}
+           (dom/button #js {:onClick #(om/update! app (initial-state))}
                        "Try again tomorrow")
            (messages-list app)))
 
