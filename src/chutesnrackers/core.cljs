@@ -95,9 +95,11 @@
 
 (defn roll
   [state]
-  (let [new-value (rand-nth values)
-        squares-to-go (reverse (take (:i state) (:squares state)))
-        next-i (:i (first (filter #(= (:value %) new-value) squares-to-go)))]
+  (let [prev-i (:i state)
+        new-value (rand-nth values)
+        squares-to-go (reverse (take prev-i (:squares state)))
+        next-square (first (filter #(= (:value %) new-value) squares-to-go))
+        next-i (or (:i next-square) prev-i)]
     (-> state
         (assoc :value new-value)
         (assoc :i next-i)
