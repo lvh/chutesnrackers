@@ -21,10 +21,7 @@ html {
   border-radius: 30px;
   width: 70px;
   height: 70px;
-}
-
-.peon {
-  z-index: 100;
+  z-index: -1;
 }
 
 .hud {
