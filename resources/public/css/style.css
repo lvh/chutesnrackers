@@ -1,4 +1,4 @@
-html {
+#app {
   box-sizing: border-box;
   font-family: "Helvetica Neue";
   font-size: 20px;
@@ -6,7 +6,7 @@ html {
   color: #333;
 }
 
-*, *:before, *:after {
+#app *, #app *:before, #app *:after {
   box-sizing: inherit;
 }
 
@@ -14,7 +14,7 @@ html {
   position: relative;
 }
 
-.grid, * {
+.grid * {
   position: absolute;
 }
 
