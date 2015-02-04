@@ -115,10 +115,9 @@
   (dom/div #js {:className "hud"}
            (dom/span nil (str "Steps to go: " (:i app)))
            (values-list app)
-           (dom/button #js {:onClick
-                            (fn [_]
-                              (om/transact! app roll))}
-                       "Let's go!")))
+           (dom/button #js {:onClick #(om/transact! app roll)}
+                       "Let's go!")
+           (messages-list app)))
 
 (om/root
   (fn [app owner]
