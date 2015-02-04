@@ -62,7 +62,7 @@
   (dom/div #js {:className (s/join " " ["grid-square" color])
                 :style (position-style i)
                 :id (str "grid-square-" i)}
-           (str i " " (grid-loc i))))
+           nil))
 
 (defn peon
   [i]
