@@ -31,7 +31,8 @@
    :value nil
    :squares (for [i (range grid-squares)]
               (let [color (rand-nth colors)]
-                {:color color
+                {:i i
+                 :color color
                  :value (values-by-color color)}))})
 
 (defonce app-state
@@ -91,6 +92,15 @@
               #js {:className (s/join " " classes)}
               (dom/span nil value))))))
 
+(defn roll
+  [state]
+  (let [new-value (rand-nth values)
+        squares-to-go (reverse (take (:i state) (:squares state)))
+        next-i (:i (first (filter #(= (:value %) new-value) squares-to-go)))]
+    (-> state
+        (assoc :value new-value)
+        (assoc :i next-i))))
+
 (defn hud
   [app]
   (dom/div #js {:className "hud"}
@@ -98,7 +108,7 @@
            (values-list app)
            (dom/button #js {:onClick
                             (fn [_]
-                              (om/transact! app :value #(rand-nth values)))}
+                              (om/transact! app roll))}
                        "Let's go!")))
 
 (om/root
