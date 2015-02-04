@@ -1,21 +1,75 @@
 (ns chutesnrackers.core
-    (:require [figwheel.client :as fw]
-              [om.core :as om :include-macros true]
-              [om.dom :as dom :include-macros true]))
+  (:require [clojure.string :as s]
+            [figwheel.client :as fw]
+            [om.core :as om :include-macros true]
+            [om.dom :as dom :include-macros true]))
 
 (enable-console-print!)
+(println "Let's play Chutes 'n' Rackers!")
 
-(println "Edits to this text should show up in your developer console.")
+;; Adults wanna learn, but they don't wanna be taught!
 
-;; define your app data so that it doesn't get over-written on reload
+(def square-px 100)
+(def gutter-width 100)
 
-(defonce app-state (atom {:text "Hello world!"}))
+(def rows 5)
+(def cols 8)
+(def grid-squares (* rows cols))
+
+(def colors ["red" "yellow" "green" "teal" "blue" "purple"])
+
+(defn initial-state
+  []
+  {:i (dec grid-squares)})
+
+(defonce app-state
+  (atom (initial-state)))
+
+(defn grid-loc
+  [i]
+  (let [col (mod i cols)
+        row (int (/ i cols))]
+    [col row]))
+
+(defn pixel-loc
+  [[col row]]
+  (let [x (* col square-px)
+        y (+ (* row square-px)
+             (* row gutter-width))]
+    [x y]))
+
+(defn position-style
+  [i]
+  (let [[x y] (pixel-loc (grid-loc i))]
+    #js {:left x :top y}))
+
+(defn grid-square
+  [i color]
+  (dom/div #js {:className (s/join " " ["grid-square" color])
+                :style (position-style i)
+                :id (str "grid-square-" i)}
+           (str i " " (grid-loc i))))
+
+(defn peon
+  [i]
+  (dom/img #js {:className "peon"
+                :src "img/rackspace.png"
+                :style (position-style i)}))
+
+(defn grid
+  [app]
+  (apply dom/div #js {:className "grid"}
+         (conj (map grid-square
+                    (range grid-squares)
+                    (cycle colors))
+               (peon (:i app)))))
 
 (om/root
   (fn [app owner]
     (reify om/IRender
       (render [_]
-        (dom/h1 nil (:text app)))))
+        (dom/div #js {:className "container"}
+                 (grid app)))))
   app-state
   {:target (. js/document (getElementById "app"))})
 

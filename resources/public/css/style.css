@@ -1,2 +1,48 @@
-/* some style */
+html {
+  box-sizing: border-box;
+}
+*, *:before, *:after {
+  box-sizing: inherit;
+}
 
+.grid {
+  position: relative;
+}
+
+.grid, * {
+  position: absolute;
+}
+
+.grid-square {
+  border-radius: 40px;
+  width: 95px;
+  height: 95px;
+}
+
+.peon {
+  z-index: 100;
+}
+
+.red {
+  background-color: hsl(0, 50%, 80%);
+}
+
+.yellow {
+  background-color: hsl(60, 50%, 80%);
+}
+
+.green {
+  background-color:  hsl(120, 50%, 80%);
+}
+
+.teal {
+  background-color: hsl(180, 50%, 80%);
+}
+
+.blue {
+background-color: hsl(240, 50%, 80%);
+}
+
+.purple {
+  background-color: hsl(300, 50%, 80%);
+}
