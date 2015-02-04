@@ -35,7 +35,8 @@
    :value nil
    :squares (for [i (range grid-squares)]
               (let [color (rand-nth colors)
-                    square-type (rand-nth square-types)]
+                    square-type (when-not (#{0 (dec grid-squares)} i)
+                                  (rand-nth square-types))]
                 {:i i
                  :color color
                  :value (values-by-color color)
