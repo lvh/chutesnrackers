@@ -121,15 +121,15 @@
 
 (defn roll
   [state]
-  (let [prev-i (:i state)
+  (let [curr-i (:i state)
         new-value (rand-nth values)
-        squares-to-go (reverse (take prev-i (:squares state)))
+        squares-to-go (reverse (take curr-i (:squares state)))
         next-square (first (filter #(= (:value %) new-value) squares-to-go))
-        next-i (or (:i next-square) prev-i)]
+        next-i (or (:i next-square) curr-i)]
     (-> state
         (assoc :value new-value)
         (assoc :i next-i)
-        (update :messages conj (str "You go from " prev-i " to " next-i "."))
+        (update :messages conj (str "You go from " curr-i " to " next-i "."))
         (teleport))))
 
 (defn messages-list
