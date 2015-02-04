@@ -17,6 +17,12 @@
 (def grid-squares (* rows cols))
 
 (def colors ["red" "yellow" "green" "teal" "blue" "purple"])
+(def values ["Fanatical Support® in all we do."
+             "Results first, substance over flash."
+             "Committed to Greatness"
+             "Full Disclosure and Transparency"
+             "Passion for our Work"
+             "Treat fellow Rackers like Friends and Family"])
 
 (defn initial-state
   []
@@ -70,10 +76,19 @@
                (peon (:i app))
                happy-customer)))
 
+(defn values-list
+  [app]
+  (apply dom/ul nil
+         (for [[color value] (zipmap colors values)]
+           (dom/li
+            #js {:className color}
+            (dom/span nil value)))))
+
 (defn hud
   [app]
   (dom/div #js {:className "hud"}
-           (dom/span nil (str "Steps to go: " (:i app)))))
+           (dom/span nil (str "Steps to go: " (:i app)))
+           (values-list app)))
 
 (om/root
   (fn [app owner]
