@@ -56,13 +56,19 @@
                 :src "img/rackspace.png"
                 :style (position-style i)}))
 
+(def happy-customer
+  (dom/img #js {:className "happy-customer"
+                :src "img/happy-customer.png"
+                :style (position-style 0)}))
+
 (defn grid
   [app]
   (apply dom/div #js {:className "grid"}
          (conj (map grid-square
                     (range grid-squares)
                     (cycle colors))
-               (peon (:i app)))))
+               (peon (:i app))
+               happy-customer)))
 
 (defn hud
   [app]
