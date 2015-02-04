@@ -29,6 +29,13 @@
   "Square types, frequency weighted by probability."
   (conj (repeat 5 nil) :chute))
 
+(defn img-attrs
+  [square-type]
+  (condp = square-type
+    :chute #js {:src "img/hole.png"
+                :style #js {:top "45px" :left "5px"}}
+    nil nil))
+
 (defn initial-state
   []
   {:i (dec grid-squares)
@@ -40,7 +47,8 @@
                 {:i i
                  :color color
                  :value (values-by-color color)
-                 :square-type square-type}))
+                 :square-type square-type
+                 :img-attrs (img-attrs square-type)}))
    :messages '("You start your day at the Rack.")})
 
 (defonce app-state
@@ -65,14 +73,12 @@
     #js {:left x :top y}))
 
 (defn grid-square
-  [{i :i color :color square-type :square-type}]
+  [{i :i color :color square-type :square-type img-attrs :img-attrs}]
   (dom/div #js {:className (s/join " " ["grid-square" color])
                 :style (position-style i)
                 :id (str "grid-square-" i)}
-           (when square-type
-             (dom/img #js {:style #js {:top "40px"
-                                       :left "5px"}
-                           :src "img/hole.png"}))))
+           (when img-attrs
+             (dom/img img-attrs))))
 
 (defn peon
   [i]
