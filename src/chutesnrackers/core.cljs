@@ -109,6 +109,12 @@
               #js {:className (s/join " " classes)}
               (dom/span nil value))))))
 
+(defn teleport
+  "Possibly get teleported by a chute or Racker."
+  [state]
+  (let [current-square (:squares state (:i state))]
+    (-> state)))
+
 (defn roll
   [state]
   (let [prev-i (:i state)
@@ -119,7 +125,8 @@
     (-> state
         (assoc :value new-value)
         (assoc :i next-i)
-        (update :messages conj (str "You go from " prev-i " to " next-i ".")))))
+        (update :messages conj (str "You go from " prev-i " to " next-i "."))
+        (teleport))))
 
 (defn messages-list
   [app]
