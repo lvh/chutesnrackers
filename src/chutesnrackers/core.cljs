@@ -25,8 +25,7 @@
              "Treat fellow Rackers like Friends and Family"])
 (def values-by-color (zipmap colors values))
 
-(defn initial-state
-  []
+(def initial-state
   {:i (dec grid-squares)
    :value nil
    :squares (for [i (range grid-squares)]
@@ -37,7 +36,7 @@
    :messages '("You start your day at the Rack.")})
 
 (defonce app-state
-  (atom (initial-state)))
+  (atom initial-state))
 
 (defn grid-loc
   [i]
