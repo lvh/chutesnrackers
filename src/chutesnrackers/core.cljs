@@ -23,11 +23,16 @@
              "Full Disclosure and Transparency"
              "Passion for our Work"
              "Treat fellow Rackers like Friends and Family"])
+(def values-by-color (zipmap colors values))
 
 (defn initial-state
   []
   {:i (dec grid-squares)
-   :value nil})
+   :value nil
+   :squares (for [i (range grid-squares)]
+              (let [color (rand-nth colors)]
+                {:color color
+                 :value (values-by-color color)}))})
 
 (defonce app-state
   (atom (initial-state)))
@@ -51,7 +56,7 @@
     #js {:left x :top y}))
 
 (defn grid-square
-  [i color]
+  [i {color :color}]
   (dom/div #js {:className (s/join " " ["grid-square" color])
                 :style (position-style i)
                 :id (str "grid-square-" i)}
@@ -71,16 +76,14 @@
 (defn grid
   [app]
   (apply dom/div #js {:className "grid"}
-         (conj (map grid-square
-                    (range grid-squares)
-                    (cycle colors))
+         (conj (map-indexed grid-square (:squares app))
                (peon (:i app))
                happy-customer)))
 
 (defn values-list
   [app]
   (apply dom/ul nil
-         (for [[color value] (zipmap colors values)]
+         (for [[color value] values-by-color]
            (let [classes (if (= (:value app) value)
                              [color "highlight"]
                              [color])]
