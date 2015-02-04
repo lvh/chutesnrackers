@@ -33,7 +33,8 @@
               (let [color (rand-nth colors)]
                 {:i i
                  :color color
-                 :value (values-by-color color)}))})
+                 :value (values-by-color color)}))
+   :messages '("You start your day at the Rack.")})
 
 (defonce app-state
   (atom (initial-state)))
@@ -99,7 +100,15 @@
         next-i (:i (first (filter #(= (:value %) new-value) squares-to-go)))]
     (-> state
         (assoc :value new-value)
-        (assoc :i next-i))))
+        (assoc :i next-i)
+        (update :messages conj (str "You go from " prev-i " to " next-i ".")))))
+
+(defn messages-list
+  [app]
+  (apply dom/ul
+         nil
+         (for [m (:messages app)]
+           (dom/li nil m))))
 
 (defn hud
   [app]
