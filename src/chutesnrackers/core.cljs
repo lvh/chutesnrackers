@@ -25,14 +25,20 @@
              "Treat fellow Rackers like Friends and Family"])
 (def values-by-color (zipmap colors values))
 
+(def square-types
+  "Square types, frequency weighted by probability."
+  (conj (repeat 5 nil) :chute))
+
 (def initial-state
   {:i (dec grid-squares)
    :value nil
    :squares (for [i (range grid-squares)]
-              (let [color (rand-nth colors)]
+              (let [color (rand-nth colors)
+                    square-type (rand-nth square-types)]
                 {:i i
                  :color color
-                 :value (values-by-color color)}))
+                 :value (values-by-color color)
+                 :square-type square-type}))
    :messages '("You start your day at the Rack.")})
 
 (defonce app-state
@@ -57,11 +63,14 @@
     #js {:left x :top y}))
 
 (defn grid-square
-  [{i :i color :color}]
+  [{i :i color :color square-type :square-type}]
   (dom/div #js {:className (s/join " " ["grid-square" color])
                 :style (position-style i)
                 :id (str "grid-square-" i)}
-           nil))
+           (when square-type
+             (dom/img #js {:style #js {:top "40px"
+                                       :left "5px"}
+                           :src "img/hole.png"}))))
 
 (defn peon
   [i]
