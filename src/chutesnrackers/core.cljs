@@ -74,7 +74,8 @@
     (reify om/IRender
       (render [_]
         (dom/div #js {:className "container"}
-                 (grid app)))))
+                 (grid app)
+                 (hud app)))))
   app-state
   {:target (. js/document (getElementById "app"))})
 
