@@ -52,6 +52,13 @@ html {
   list-style-image: url("../img/go-right.png");
 }
 
+.hud button {
+  margin-top: 20px;
+  width: 100%;
+  line-height: 2em;
+  font-size: 20px;
+}
+
 .red {
   background-color: hsl(0, 50%, 80%);
 }
