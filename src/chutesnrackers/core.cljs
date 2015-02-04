@@ -119,6 +119,8 @@
            (dom/button #js {:disabled (= (:i app) 0)
                             :onClick #(om/transact! app roll)}
                        "Let's go!")
+           (dom/button #js {:onClick #(om/update! app initial-state)}
+                       "Try again tomorrow")
            (messages-list app)))
 
 (om/root
