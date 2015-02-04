@@ -26,7 +26,8 @@
 
 (defn initial-state
   []
-  {:i (dec grid-squares)})
+  {:i (dec grid-squares)
+   :value nil})
 
 (defonce app-state
   (atom (initial-state)))
@@ -80,15 +81,22 @@
   [app]
   (apply dom/ul nil
          (for [[color value] (zipmap colors values)]
-           (dom/li
-            #js {:className color}
-            (dom/span nil value)))))
+           (let [classes (if (= (:value app) value)
+                             [color "highlight"]
+                             [color])]
+             (dom/li
+              #js {:className (s/join " " classes)}
+              (dom/span nil value))))))
 
 (defn hud
   [app]
   (dom/div #js {:className "hud"}
            (dom/span nil (str "Steps to go: " (:i app)))
-           (values-list app)))
+           (values-list app)
+           (dom/button #js {:onClick
+                            (fn [_]
+                              (om/transact! app :value #(rand-nth values)))}
+                       "Let's go!")))
 
 (om/root
   (fn [app owner]
