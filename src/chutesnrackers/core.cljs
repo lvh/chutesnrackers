@@ -37,6 +37,7 @@
   (condp = square-type
     :chute #js {:src "img/hole.png"
                 :style #js {:top "45px" :left "5px"}}
+    :racker #js {:src "img/rackspace.png"}
     nil nil))
 
 (defn initial-state
