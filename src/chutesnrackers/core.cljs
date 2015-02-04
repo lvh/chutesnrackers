@@ -64,6 +64,11 @@
                     (cycle colors))
                (peon (:i app)))))
 
+(defn hud
+  [app]
+  (dom/div #js {:className "hud"}
+           (dom/span nil (str "Steps to go: " (:i app)))))
+
 (om/root
   (fn [app owner]
     (reify om/IRender

@@ -23,6 +23,13 @@ html {
   z-index: 100;
 }
 
+.hud {
+  position: fixed;
+  width: 400px;
+  right: 0px;
+  top: 0px;
+}
+
 .red {
   background-color: hsl(0, 50%, 80%);
 }
