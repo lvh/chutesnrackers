@@ -25,6 +25,9 @@
              "Treat fellow Rackers like Friends and Family"])
 (def values-by-color (zipmap colors values))
 
+(def faces
+  (map #(str "img/face-" % ".png") (range 5)))
+
 (def square-types
   "Square types, frequency weighted by probability."
   (conj (repeat 5 nil) :chute))
@@ -40,6 +43,7 @@
   []
   {:i (dec grid-squares)
    :value nil
+   :peon-img (rand-nth faces)
    :squares (for [i (range grid-squares)]
               (let [color (rand-nth colors)
                     square-type (when-not (#{0 (dec grid-squares)} i)
@@ -81,9 +85,9 @@
              (dom/img img-attrs))))
 
 (defn peon
-  [i]
+  [i img]
   (dom/img #js {:className "peon"
-                :src "img/rackspace.png"
+                :src img
                 :style (position-style i)}))
 
 (def happy-customer
@@ -95,7 +99,7 @@
   [app]
   (apply dom/div #js {:className "grid"}
          (conj (map grid-square (:squares app))
-               (peon (:i app))
+               (peon (:i app) (:peon-img app))
                happy-customer)))
 
 (defn values-list
