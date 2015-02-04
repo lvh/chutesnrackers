@@ -30,7 +30,7 @@
 
 (def square-types
   "Square types, frequency weighted by probability."
-  (conj (repeat 5 nil) :chute))
+  [nil nil nil nil :chute :chute :racker])
 
 (defn img-attrs
   [square-type]
