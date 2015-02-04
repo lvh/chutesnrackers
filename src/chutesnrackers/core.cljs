@@ -82,6 +82,10 @@
   (dom/div #js {:className (s/join " " ["grid-square" color])
                 :style (position-style i)
                 :id (str "grid-square-" i)}
+           (dom/div #js {:style #js {:color "#888"
+                                     :top "5px"
+                                     :left "15px"}}
+                     (str i))
            (when img-attrs
              (dom/img img-attrs))))
 
