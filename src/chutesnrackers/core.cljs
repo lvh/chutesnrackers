@@ -9,8 +9,8 @@
 
 ;; Adults wanna learn, but they don't wanna be taught!
 
-(def square-px 100)
-(def gutter-width 100)
+(def square-px 80)
+(def gutter-width 80)
 
 (def rows 5)
 (def cols 8)
