@@ -17,8 +17,8 @@
 (def grid-squares (* rows cols))
 
 (def colors ["red" "yellow" "green" "teal" "blue" "purple"])
-(def values ["Fanatical Support® in all we do."
-             "Results first, substance over flash."
+(def values ["Fanatical Support® in all we do"
+             "Results first, substance over flash"
              "Committed to Greatness"
              "Full Disclosure and Transparency"
              "Passion for our Work"
@@ -81,7 +81,7 @@
 (defn in-between-style
   [below-row & center]
   (let [col (if center
-              (/ cols 2)
+              3.5
               (if (= (mod below-row 2) 0) (dec cols) 0))
         [x y] (pixel-loc [col below-row])
         y (+ y square-px)]
@@ -114,11 +114,14 @@
 
 (defn in-between-decoration
   [n img-name]
-  (dom/img #js {:src (str "img/" img-name ".png")
-                :style (in-between-style n)}))
+  (let [style (in-between-style n)]
+    (dom/img #js {:src (str "img/" img-name ".png")
+                  :style style})))
 
-(defn arrow
-  [])
+(defn in-between-arrow
+  [n img-name]
+  (dom/img #js {:src (str "img/" img-name ".png")
+                :style (in-between-style n true)}))
 
 (defn grid
   [app]
@@ -130,7 +133,10 @@
                               ["walk"
                                "restroom"
                                "lunch"
-                               "coffee"]))))
+                               "coffee"])
+                 (map-indexed in-between-arrow
+                              (take rows (cycle ["long-left-arrow"
+                                                 "long-right-arrow"]))))))
 
 (defn values-list
   [app]
@@ -168,12 +174,15 @@
         next-i (or (:i next-square) curr-i)
         msg (if (= next-i 0)
               "The customer is amazed by your fanatical support! Way to go!"
-              (str "You go from square " curr-i " to square " next-i "."))]
+              (if (= curr-i next-i)
+                (str new-value " is a great core value, but it's not going to "
+                     "cut in this situation. Keep trying, you're close!")
+                (str "You go from square " curr-i " to square " next-i ".")))]
     (-> state
         (assoc :value new-value)
         (assoc :i next-i)
-        (update :messages conj msg)
-        (teleport))))
+        (teleport)
+        (update :messages conj msg))))
 
 (defn messages-list
   [app]
@@ -184,14 +193,15 @@
 
 (defn steps-to-go-msg
   [i]
-  (if (= i 0)
-    (str "Awesome! ☺")
-    (let [motivational (condp <= (/ i grid-squares)
-                         .8 "Just warming up!"
-                         .5 "Keep it up!"
-                         .3 "You're doing great!"
-                         0 "Almost there!")]
-      (str i " steps to go. " motivational))))
+  (cond
+    (= i 0) (str "Awesome! ☺")
+    (= i 1) (str "Just one more step!")
+    :else (let [motivational (condp <= (/ i grid-squares)
+                               .8 "Just warming up!"
+                               .5 "Keep it up!"
+                               .3 "You're doing great!"
+                               0 "Almost there!")]
+            (str i " steps to go. " motivational))))
 
 (defn hud
   [app]
