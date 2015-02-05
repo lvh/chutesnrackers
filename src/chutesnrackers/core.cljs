@@ -114,9 +114,8 @@
            (let [classes (if (= (:value app) value)
                              [color "highlight"]
                              [color])]
-             (dom/li
-              #js {:className (s/join " " classes)}
-              (dom/span nil value))))))
+             (dom/li #js {:className (s/join " " classes)}
+                     (dom/span nil value))))))
 
 (defn teleport
   "Possibly get teleported by a chute or Racker."
