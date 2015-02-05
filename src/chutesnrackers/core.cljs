@@ -81,7 +81,7 @@
 (defn in-between-style
   [below-row & center]
   (let [col (if center
-              (/ cols 2)
+              3.5
               (if (= (mod below-row 2) 0) (dec cols) 0))
         [x y] (pixel-loc [col below-row])
         y (+ y square-px)]
