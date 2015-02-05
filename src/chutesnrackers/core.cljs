@@ -144,7 +144,8 @@
     (-> state
         (assoc :value new-value)
         (assoc :i next-i)
-        (update :messages conj (str "You go from " curr-i " to " next-i "."))
+        (update :messages conj (str "You go from " curr-i
+                                    " to " next-i "."))
         (teleport))))
 
 (defn messages-list
