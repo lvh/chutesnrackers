@@ -159,7 +159,12 @@
   [i]
   (if (= i 0)
     (str "Whew! All done, time to go home ☺")
-    (str i " steps to go.")))
+    (let [motivational (condp <= (/ i grid-squares)
+                         .8 "Just warming up!"
+                         .5 "Keep it up!"
+                         .3 "You're doing great!"
+                         0 "Almost there!")]
+      (str i " steps to go. " motivational))))
 
 (defn hud
   [app]
