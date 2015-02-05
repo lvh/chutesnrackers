@@ -172,8 +172,8 @@
     (-> state
         (assoc :value new-value)
         (assoc :i next-i)
-        (update :messages conj msg)
-        (teleport))))
+        (teleport)
+        (update :messages conj msg))))
 
 (defn messages-list
   [app]
