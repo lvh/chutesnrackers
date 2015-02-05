@@ -84,9 +84,9 @@
                 :style (position-style i)
                 :id (str "grid-square-" i)}
            (dom/div #js {:style #js {:color "#888"
-                                     :top "3px"
-                                     :left "16px"}}
                      (str i))
+                                     :top "1px"
+                                     :left "12px"}}
            (when img-attrs
              (dom/img img-attrs))))
 
