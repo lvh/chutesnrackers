@@ -78,15 +78,26 @@
   (let [[x y] (pixel-loc (grid-loc i))]
     #js {:left x :top y}))
 
+(defn in-between-style
+  [below-row & center]
+  (let [col (if center
+              (/ cols 2)
+              (if (= (mod below-row 2) 0) (dec cols) 0))
+        [x y] (pixel-loc [col below-row])
+        y (+ y square-px)]
+    #js {:left x :top y}))
+
 (defn grid-square
   [{i :i color :color square-type :square-type img-attrs :img-attrs}]
   (dom/div #js {:className (s/join " " ["grid-square" color])
                 :style (position-style i)
                 :id (str "grid-square-" i)}
            (dom/div #js {:style #js {:color "#888"
-                     (str i))
                                      :top "1px"
                                      :left "12px"}}
+                    (if (= i 0)
+                      "Goal"
+                      (str i)))
            (when img-attrs
              (dom/img img-attrs))))
 
@@ -101,12 +112,25 @@
                 :src "img/happy-customer.png"
                 :style (position-style 0)}))
 
+(defn in-between-decoration
+  [n img-name]
+  (dom/img #js {:src (str "img/" img-name ".png")
+                :style (in-between-style n)}))
+
+(defn arrow
+  [])
+
 (defn grid
   [app]
   (apply dom/div #js {:className "grid"}
-         (conj (map grid-square (:squares app))
-               (peon (:i app) (:peon-img app))
-               happy-customer)))
+         (concat (map grid-square (:squares app))
+                 [(peon (:i app) (:peon-img app))
+                  happy-customer]
+                 (map-indexed in-between-decoration
+                              ["walk"
+                               "restroom"
+                               "lunch"
+                               "coffee"]))))
 
 (defn values-list
   [app]
@@ -141,12 +165,14 @@
         new-value (rand-nth values)
         squares-to-go (reverse (take curr-i (:squares state)))
         next-square (first (filter #(= (:value %) new-value) squares-to-go))
-        next-i (or (:i next-square) curr-i)]
+        next-i (or (:i next-square) curr-i)
+        msg (if (= next-i 0)
+              "The customer is amazed by your fanatical support! Way to go!"
+              (str "You go from square " curr-i " to square " next-i "."))]
     (-> state
         (assoc :value new-value)
         (assoc :i next-i)
-        (update :messages conj (str "You go from " curr-i
-                                    " to " next-i "."))
+        (update :messages conj msg)
         (teleport))))
 
 (defn messages-list
@@ -159,7 +185,7 @@
 (defn steps-to-go-msg
   [i]
   (if (= i 0)
-    (str "Whew! All done, time to go home ☺")
+    (str "Awesome! ☺")
     (let [motivational (condp <= (/ i grid-squares)
                          .8 "Just warming up!"
                          .5 "Keep it up!"

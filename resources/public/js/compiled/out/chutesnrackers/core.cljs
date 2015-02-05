@@ -10,7 +10,7 @@
 ;; Adults wanna learn, but they don't wanna be taught!
 
 (def square-px 80)
-(def gutter-width 60)
+(def gutter-width 110)
 
 (def rows 5)
 (def cols 8)
@@ -25,15 +25,36 @@
              "Treat fellow Rackers like Friends and Family"])
 (def values-by-color (zipmap colors values))
 
+(def faces
+  (map #(str "img/face-" % ".png") (range 5)))
+
+(def square-types
+  "Square types, frequency weighted by probability."
+  [nil nil nil nil :chute :chute :racker])
+
+(defn img-attrs
+  [square-type]
+  (condp = square-type
+    :chute #js {:src "img/hole.png"
+                :style #js {:top "45px" :left "5px"}}
+    :racker #js {:src "img/rackspace.png"
+                 :style #js {:top "30px" :left "18px"}}
+    nil nil))
+
 (defn initial-state
   []
   {:i (dec grid-squares)
    :value nil
+   :peon-img (rand-nth faces)
    :squares (for [i (range grid-squares)]
-              (let [color (rand-nth colors)]
+              (let [color (rand-nth colors)
+                    square-type (when-not (#{0 (dec grid-squares)} i)
+                                  (rand-nth square-types))]
                 {:i i
                  :color color
-                 :value (values-by-color color)}))
+                 :value (values-by-color color)
+                 :square-type square-type
+                 :img-attrs (img-attrs square-type)}))
    :messages '("You start your day at the Rack.")})
 
 (defonce app-state
@@ -57,17 +78,33 @@
   (let [[x y] (pixel-loc (grid-loc i))]
     #js {:left x :top y}))
 
+(defn in-between-style
+  [below-row & center]
+  (let [col (if center
+              (/ cols 2)
+              (if (= (mod below-row 2) 0) (dec cols) 0))
+        [x y] (pixel-loc [col below-row])
+        y (+ y square-px)]
+    #js {:left x :top y}))
+
 (defn grid-square
-  [i {color :color}]
+  [{i :i color :color square-type :square-type img-attrs :img-attrs}]
   (dom/div #js {:className (s/join " " ["grid-square" color])
                 :style (position-style i)
                 :id (str "grid-square-" i)}
-           nil))
+           (dom/div #js {:style #js {:color "#888"
+                                     :top "1px"
+                                     :left "12px"}}
+                    (if (= i 0)
+                      "Goal"
+                      (str i)))
+           (when img-attrs
+             (dom/img img-attrs))))
 
 (defn peon
-  [i]
+  [i img]
   (dom/img #js {:className "peon"
-                :src "img/rackspace.png"
+                :src img
                 :style (position-style i)}))
 
 (def happy-customer
@@ -75,12 +112,25 @@
                 :src "img/happy-customer.png"
                 :style (position-style 0)}))
 
+(defn in-between-decoration
+  [n img-name]
+  (dom/img #js {:src (str "img/" img-name ".png")
+                :style (in-between-style n)}))
+
+(defn arrow
+  [])
+
 (defn grid
   [app]
   (apply dom/div #js {:className "grid"}
-         (conj (map-indexed grid-square (:squares app))
-               (peon (:i app))
-               happy-customer)))
+         (concat (map grid-square (:squares app))
+                 [(peon (:i app) (:peon-img app))
+                  happy-customer]
+                 (map-indexed in-between-decoration
+                              ["walk"
+                               "restroom"
+                               "lunch"
+                               "coffee"]))))
 
 (defn values-list
   [app]
@@ -89,26 +139,41 @@
            (let [classes (if (= (:value app) value)
                              [color "highlight"]
                              [color])]
-             (dom/li
-              #js {:className (s/join " " classes)}
-              (dom/span nil value))))))
+             (dom/li #js {:className (s/join " " classes)}
+                     (dom/span nil value))))))
 
 (defn teleport
   "Possibly get teleported by a chute or Racker."
-  [state]
-  state)
+  [{curr-i :i squares :squares :as state}]
+  (let [square-type (:square-type (nth squares curr-i))
+        _ (println square-type)]
+    (if square-type
+      (let [[i msg] (condp = square-type
+                      :chute [(+ (rand-int (- grid-squares curr-i))
+                                 curr-i)
+                              "You fall down."]
+                      :racker [(rand-int curr-i)
+                               "You get helped up."])]
+        (-> state
+            (assoc :i i)
+            (update :messages conj msg)))
+      state)))
 
 (defn roll
   [state]
-  (let [prev-i (:i state)
+  (let [curr-i (:i state)
         new-value (rand-nth values)
-        squares-to-go (reverse (take prev-i (:squares state)))
+        squares-to-go (reverse (take curr-i (:squares state)))
         next-square (first (filter #(= (:value %) new-value) squares-to-go))
-        next-i (or (:i next-square) prev-i)]
+        next-i (or (:i next-square) curr-i)
+        msg (if (= next-i 0)
+              "The customer is amazed by your fanatical support! Way to go!"
+              (str "You go from square " curr-i " to square " next-i "."))]
     (-> state
         (assoc :value new-value)
         (assoc :i next-i)
-        (update :messages conj (str "You go from " prev-i " to " next-i ".")))))
+        (update :messages conj msg)
+        (teleport))))
 
 (defn messages-list
   [app]
@@ -117,13 +182,27 @@
          (for [m (:messages app)]
            (dom/li nil m))))
 
+(defn steps-to-go-msg
+  [i]
+  (if (= i 0)
+    (str "Awesome! ☺")
+    (let [motivational (condp <= (/ i grid-squares)
+                         .8 "Just warming up!"
+                         .5 "Keep it up!"
+                         .3 "You're doing great!"
+                         0 "Almost there!")]
+      (str i " steps to go. " motivational))))
+
 (defn hud
   [app]
   (dom/div #js {:className "hud"}
-           (dom/span nil (str "Steps to go: " (:i app)))
+           (dom/span nil (steps-to-go-msg (:i app)))
            (values-list app)
-           (dom/button #js {:onClick #(om/transact! app roll)}
+           (dom/button #js {:disabled (= (:i app) 0)
+                            :onClick #(om/transact! app roll)}
                        "Let's go!")
+           (dom/button #js {:onClick #(om/update! app (initial-state))}
+                       "Try again tomorrow")
            (messages-list app)))
 
 (om/root
