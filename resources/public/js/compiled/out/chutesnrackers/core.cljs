@@ -23,6 +23,30 @@
              "Full Disclosure and Transparency"
              "Passion for our Work"
              "Treat fellow Rackers like Friends and Family"])
+(def defining
+  ["You're not sure how to solve this problem, but you leverage your teammates and they help you forward."
+   "A new fellow Racker is struggling, but you help them by leading by example."
+   "You get a weird e-mail from a customer. They seem upset, but you leverage your relationship with them to ensure them you're going to own the problem."
+   "A fellow Racker makes a call, but you're not sure it's the right one. You take it to them, and thanks to your relationship built on trust and respect, you work out the differences."
+   "You're asked to temporarily help out another team. Because you're acutely aware of your own strengths, you can find a perfect way to help them acchieve the common goal."
+   "You manage to get the customer's service to a pretty decent level, but you decide to go the extra mile."
+   "Some customer credentials weren't handled securely. We immediately collaborate to simultaneously rectify the problem and contact Incident Management."
+   "You see a feature that you know is almost done, but isn't quite right. You keep at it until it's exactly what it needs to be."
+   "A Racker gives you some pretty hefty criticism, but you try to interpret it constructively, and assume they mean well."
+   "A Racker is struggling. You go talk to them and see if there's a way you can help them be the best Racker they can be."
+   "You're not doing well. A Racker has an honest conversation with you about your performance, and helps you find ways to improve."
+   "You're done implementing a feature, and you know it's a little janky. You keep owning that result, even after the product has shipped."])
+(def defecting
+  ["A customer is upset because we failed to meet their expectations. Unfortunately, we overpromised what we'd be able to do for them."
+   "You work on an irrelevant detail for a while. You know it doesn't matter, but who cares? At least your boss sees you working, right?"
+   "You come up with a solution to a customer problem in a brainstorming session, but a fellow Racker shuts you down in front of the team."
+   "A coworker comes up with what you feel is a hare-brained scheme. You rip into them without considering the consequences of your actions."
+   "The team has had a few failures, but nothing is being done, and no-one is accountable. You don't speak up, because you might get in trouble."
+   "A Racker previously used the same tools you are now and didn't put them back in order. You can't do your job because of it."
+   "We had a serious security problem, but no-one else knows yet. If we just keep it to ourselves, we'll be fine."
+   "You know that this isn't the best solution, but it's the solution that lets you go home five minutes from now. You sell it to the customer anyway."
+   "You try to be everything to everyone, but some of those behaviors just don't match up with your strengths."])
+
 (def values-by-color (zipmap colors values))
 
 (def faces
@@ -35,8 +59,12 @@
 (defn img-attrs
   [square-type]
   (condp = square-type
-    :chute #js {:src "img/hole.png"
-                :style #js {:top "45px" :left "5px"}}
+    :chute (rand-nth [#js {:src "img/hole.png"
+                           :style #js {:top "45px" :left "5px"}}
+                      #js {:src "img/warning.png"
+                           :style #js {:top "30px" :left "20px"}}
+                      #js {:src "img/cone.png"
+                           :style #js {:top "30px" :left "20px"}}])
     :racker #js {:src "img/rackspace.png"
                  :style #js {:top "30px" :left "18px"}}
     nil nil))
@@ -148,6 +176,13 @@
              (dom/li #js {:className (s/join " " classes)}
                      (dom/span nil value))))))
 
+(defn move-msg
+  [curr-i i]
+  (if (= curr-i i)
+    "You stay where you are."
+    (let [move (if (< curr-i i) "go back" "advance")]
+      (str "You " move " from square " curr-i " to " i "."))))
+
 (defn teleport
   "Possibly get teleported by a chute or Racker."
   [{curr-i :i squares :squares :as state}]
@@ -157,12 +192,13 @@
       (let [[i msg] (condp = square-type
                       :chute [(+ (rand-int (- grid-squares curr-i))
                                  curr-i)
-                              "You fall down."]
+                              (rand-nth defecting)]
                       :racker [(rand-int curr-i)
-                               "You get helped up."])]
+                               (rand-nth defining)])
+            msg (str msg)]
         (-> state
             (assoc :i i)
-            (update :messages conj msg)))
+            (update :messages conj (s/join " " [msg (move-msg curr-i i)]))))
       state)))
 
 (defn roll
@@ -176,13 +212,14 @@
               "The customer is amazed by your fanatical support! Way to go!"
               (if (= curr-i next-i)
                 (str new-value " is a great core value, but it's not going to "
-                     "cut in this situation. Keep trying, you're close!")
-                (str "You go from square " curr-i " to square " next-i ".")))]
+                     "be enough by itself in this situation. Keep trying, "
+                     "you're close!")
+                (move-msg curr-i next-i)))]
     (-> state
         (assoc :value new-value)
         (assoc :i next-i)
-        (teleport)
-        (update :messages conj msg))))
+        (update :messages conj msg)
+        (teleport))))
 
 (defn messages-list
   [app]
@@ -212,7 +249,7 @@
                             :onClick #(om/transact! app roll)}
                        "Let's go!")
            (dom/button #js {:onClick #(om/update! app (initial-state))}
-                       "Try again tomorrow")
+                       "Another day, another racker")
            (messages-list app)))
 
 (om/root
